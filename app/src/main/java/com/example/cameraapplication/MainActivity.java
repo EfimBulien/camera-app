@@ -1,6 +1,8 @@
 package com.example.cameraapplication;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +16,8 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.util.Objects;
 
@@ -30,8 +34,15 @@ public class MainActivity extends AppCompatActivity {
         profileIv = findViewById(R.id.profile_iv);
         cameraBtn = findViewById(R.id.camera_btn);
         galleryBtn = findViewById(R.id.gallery_btn);
-        //videoCameraBtn = findViewById(R.id.video_camera_btn);
-        //videoGalleryBtn = findViewById(R.id.video_gallery_btn);
+        videoCameraBtn = findViewById(R.id.video_camera_btn);
+        videoGalleryBtn = findViewById(R.id.video_gallery_btn);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    100);
+        }
 
         cameraBtn.setOnClickListener(view -> {
             Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -82,26 +93,20 @@ public class MainActivity extends AppCompatActivity {
 
     ActivityResultLauncher<Intent> videoCameraResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        Uri videoUri = result.getData().getData();
-                        Toast.makeText(MainActivity.this, "Видео снято: " + Objects.requireNonNull(videoUri), Toast.LENGTH_LONG).show();
-                    }
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri videoUri = result.getData().getData();
+                    Toast.makeText(MainActivity.this, "Видео снято: " + videoUri, Toast.LENGTH_LONG).show();
                 }
             }
     );
 
     ActivityResultLauncher<Intent> videoGalleryResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        Uri videoUri = result.getData().getData();
-                        Toast.makeText(MainActivity.this, "Выбрано видео: " + Objects.requireNonNull(videoUri), Toast.LENGTH_LONG).show();
-                    }
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri videoUri = result.getData().getData();
+                    Toast.makeText(MainActivity.this, "Выбрано видео: " + videoUri, Toast.LENGTH_LONG).show();
                 }
             }
     );
